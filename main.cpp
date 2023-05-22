@@ -22,12 +22,12 @@ void decompress(void);
 void getFilename( string *filename1, string *filename2);//转换文件名
 void findFrequency( string loc);//统计字频并输出
 void buildHuffmanTree(void);//构造哈夫曼树
-void encode(void);//字符编码
+void encode( node rt);//字符编码
 //void encodeFile(string filename1,string filename2);//文件编码压缩,计算大小
 
 priority_queue<node> priABC;//按字频由小到大存储
 int intABC[asciiSIZE];//字频记录
-node *root;//Huffman树根节点
+node root;//Huffman树根节点
 string hufcode[asciiSIZE];//Huffman编码
 //int deciHufcode[asciiSIZE];
 int originSize,finalSize;
@@ -63,7 +63,7 @@ void compress(void){
     printf("压缩中...\n");
     findFrequency( filename1 );//统计字频并输出
     buildHuffmanTree();//构造Huffman树
-    encode();//编码并输出
+    encode( root );//编码并输出
     //encodeFile(filename1,filename2);//将压缩的1保存在2,计算文件大小
     printf("压缩完成!\n");
 }
@@ -128,6 +128,7 @@ void getFilename( string *filename1, string *filename2){
 }
 
 void buildHuffmanTree(){
+    //node tmp;
     while(!priABC.empty()){
         //取出两最小权
         node ta,tb;
@@ -151,29 +152,27 @@ void buildHuffmanTree(){
         tt.rch->rch = tb.rch;
         if(priABC.empty())break;
         priABC.push( tt );
-        root = &tt;
+        root = tt;
     }
 }
 
-void dfs(node *t,string tmp){
-    if(t->lch == NULL){
-        hufcode[ t->ascii ] = tmp;
-        int nm = stoi(tmp);
+void dfs( node t ,string tmp){
+    if(t.lch == NULL){
+        hufcode[ t.ascii ] = tmp;
+        //int nm = stoi(tmp);
 
     }else{
         tmp += "0";
-        dfs( t->lch, tmp);
+        dfs( *(t.lch), tmp);
         tmp.erase(tmp.end()-1);
         tmp += "1";
-        dfs( t->rch , tmp);
+        dfs( *(t.rch) , tmp);
     }
 }
 
-void encode(void){
-    //string tmp;
-    //printf("字符及对应Huffman编码:\n字符 | 编码:\n");
-    //node *t = root;
-    dfs(root,"");
+void encode( node rt ){
+    printf("字符及对应Huffman编码:\n字符 | 编码:\n");
+    dfs( rt , "" );
     
     for(int i=0;i<asciiSIZE;i++){
         if( !hufcode[ i ].empty()){
