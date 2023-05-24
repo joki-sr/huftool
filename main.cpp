@@ -339,27 +339,36 @@ void encodeFile(string filename1,string filename2){
     printf("压缩比(压缩文件大小/原文件大小):%.2f%\n",float(finalSize *100 )/( originSize ));
 }
 
-void decodeFile(string filename1,string filename2){
-    ifstream file1(filename2,ios::in);
-    ofstream file2(filename1,ios::out);
+void decodeFile(string txtname,string hufname){
+    char hufnamee[ hufname.length() ];
+    hufname.copy( hufnamee , hufname.length() );
+    FILE *readfile = fopen( hufnamee,"rb");
+    ofstream writefile( txtname ,ios::out);//txt for write
+    
     char c;
     char fl;
     int n;
     stack<char> tmp;
     string tmpstr;
     string str;//code 0101
-    c = file1.get();
+    //c = file1.get();
+    fscanf( readfile , "%c", &c );
+
     numberofchar = int(c);
     //开头处理
     for(int i=0;i<numberofchar;i++){
-        char ch = file1.get();
-        char len = file1.get();
+        //char ch = readfile.get();
+        char ch,len;
+        fscanf( readfile , "%c", &ch );
+        //char len = readfile.get();
+        fscanf( readfile , "%c", &len );
         int byte = ceil( ( len - '\0' ) / 8.0 );
         
         
         str.clear();
         for(int ii=0;ii<byte;ii++){//char to 01010
-            c = file1.get();
+            //c = readfile.get();
+            fscanf( readfile , "%c", &c );
             n = int( c );
             if( n < 0 ) n += 256;/////////////////////////////
             for(int i=0;i<8;i++){
@@ -378,9 +387,9 @@ void decodeFile(string filename1,string filename2){
     tmpstr.clear();
     //正文处理
     int cnt = 0;/////////
-    while((c = file1.get())){
-    //while( (c = file1.get()) && c != EOF ){
-        //c = file1.get();
+    //while((c = readfile.get())){
+    while(1){
+        fscanf( readfile , "%c", &c );
         n = int( c );
         if( n < 0 )n += 256;
         for(int i=0;i<8;i++){
@@ -398,18 +407,16 @@ void decodeFile(string filename1,string filename2){
                 for(int i=0;i<siz;i++){
                     if( tmpstr.compare( deHufcode[len][i].str) == 0){//找到
                         c = deHufcode[ len ][ i ].c;cnt++;
-                        if( cnt > 300 ){/////
+                        if( cnt > 310 ){/////
                             cnt ++;///////
                         }
-                        if(cnt > 1000){
-                            cnt++;
-                        }/////////
                         if( c == '\7'){//结尾，停止
-                            file1.close();
-                            file2.close();
+                            //readfile.close();
+                            fclose( readfile );
+                            writefile.close();
                             return ;
                         }
-                        file2.write( &c, sizeof(char));
+                        writefile.write( &c, sizeof(char));
                         tmpstr.clear();
                         break;
                     }
